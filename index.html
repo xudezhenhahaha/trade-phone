@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>交易记录 · 盈亏分析</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,7 +26,11 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0a0a0a;
-      height: var(--app-h, 100dvh);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       overflow: hidden;
       overscroll-behavior: none;
       color: #e0e0e0;
@@ -992,19 +999,6 @@
     var pnlCount = 6;      // 一屏显示的笔数（缩放级别）
     var lineSelectedIdx = 0; // 资产/收益率曲线当前选中的点索引
     var lineMarker = false;  // 资产/收益率：竖虚线仅在交互时显示
-
-    // iOS 主屏幕独立模式下 100dvh 会解析成小视口高度，导致底部留白。
-    // 用 JS 把页面高度设为真实可见高度，并随旋转/键盘伸缩更新。
-    function setAppHeight() {
-      document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
-      if (window.visualViewport) {
-        document.documentElement.style.setProperty('--app-h', window.visualViewport.height + 'px');
-      }
-    }
-    window.addEventListener('resize', setAppHeight);
-    window.addEventListener('orientationchange', setAppHeight);
-    if (window.visualViewport) window.visualViewport.addEventListener('resize', setAppHeight);
-    setAppHeight();
 
     function init() {
       load();
