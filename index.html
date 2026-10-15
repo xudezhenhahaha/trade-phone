@@ -30,7 +30,7 @@
       top: 0;
       left: 0;
       right: 0;
-      bottom: 0;
+      height: var(--app-h, 100svh);
       overflow: hidden;
       overscroll-behavior: none;
       color: #e0e0e0;
@@ -999,6 +999,18 @@
     var pnlCount = 6;      // 一屏显示的笔数（缩放级别）
     var lineSelectedIdx = 0; // 资产/收益率曲线当前选中的点索引
     var lineMarker = false;  // 资产/收益率：竖虚线仅在交互时显示
+
+    // iOS 主屏幕独立模式下，innerHeight/dvh/svh 都是整屏大视口，会多出底部保留区的空白。
+    // 真实可见高度要用 visualViewport.height，用它来设定页面高度并随键盘/旋转更新。
+    function setAppHeight() {
+      var h = window.innerHeight;
+      if (window.visualViewport && window.visualViewport.height) h = window.visualViewport.height;
+      document.documentElement.style.setProperty('--app-h', h + 'px');
+    }
+    window.addEventListener('resize', setAppHeight);
+    window.addEventListener('orientationchange', setAppHeight);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', setAppHeight);
+    setAppHeight();
 
     function init() {
       load();
