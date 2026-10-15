@@ -16,46 +16,65 @@
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
+    html {
+      height: 100%;
+      overflow: hidden;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0a0a0a;
-      min-height: 100vh;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
       color: #e0e0e0;
-      padding-top: max(10px, env(safe-area-inset-top));
-      padding-bottom: calc(70px + env(safe-area-inset-bottom));
+      padding-top: max(8px, env(safe-area-inset-top));
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
     }
     .container {
       max-width: 600px;
+      width: 100%;
       margin: 0 auto;
-      padding: 0 15px;
+      padding: 0 12px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
     .page {
       display: none;
-      padding: 10px 0;
+      padding: 0;
       animation: fadeIn 0.2s ease;
     }
     .page.active {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      gap: 10px;
+      overflow: hidden;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     .card {
       background: #141414;
       border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 15px;
+      padding: 15px;
+      margin-bottom: 0;
       border: 1px solid #222;
     }
     .card.compact {
       padding: 14px;
     }
     .card-title {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: #888;
-      margin-bottom: 15px;
-      padding-bottom: 12px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
       border-bottom: 1px solid #252525;
       font-weight: 500;
       display: flex;
@@ -70,12 +89,17 @@
     }
     .card-row {
       display: flex;
-      gap: 12px;
-      margin-bottom: 15px;
+      gap: 10px;
+      margin-bottom: 0;
+      flex-shrink: 0;
     }
     .card-row .card {
       flex: 1;
+      min-width: 0;
       margin-bottom: 0;
+    }
+    .page.active > * {
+      min-width: 0;
     }
     .btn-vertical {
       display: flex;
@@ -83,7 +107,7 @@
       gap: 10px;
     }
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
     .form-group.compact {
       margin-bottom: 12px;
@@ -126,11 +150,12 @@
     }
     .pnl-input-group {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0,1fr) minmax(0,1fr);
       gap: 10px;
     }
     .pnl-input-item {
       position: relative;
+      min-width: 0;
     }
     .pnl-input-item label {
       display: block;
@@ -179,14 +204,14 @@
     }
     .btn {
       width: 100%;
-      padding: 16px;
+      padding: 13px;
       border: none;
       border-radius: 12px;
       cursor: pointer;
       font-size: 1rem;
       font-weight: 500;
       transition: all 0.2s;
-      min-height: 52px;
+      min-height: 46px;
     }
     .btn.compact {
       padding: 12px;
@@ -250,10 +275,10 @@
     }
     .current-balance {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      padding: 16px;
+      padding: 12px;
       border-radius: 14px;
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       border: 1px solid #252540;
     }
     .current-balance .label {
@@ -263,19 +288,22 @@
     }
     .current-balance .value {
       color: #fff;
-      font-size: 1.6rem;
+      font-size: 1.45rem;
       font-weight: 700;
     }
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0,1fr));
       gap: 8px;
       margin-bottom: 8px;
     }
     .stats-grid-small {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0,1fr));
       gap: 6px;
+    }
+    .stat-card {
+      min-width: 0;
     }
     .stat-card {
       background: #1a1a1a;
@@ -316,23 +344,27 @@
     .stat-value.negative { color: #f44336; }
     .chart-container {
       position: relative;
-      height: 320px;
+      flex: 1 1 auto;
+      min-height: 130px;
       background: #0a0a0a;
       border-radius: 12px;
       margin-top: 10px;
     }
     #chartCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      touch-action: pan-y; /* 竖向留给页面滚动，横向滑动与双指缩放由脚本处理 */
+      touch-action: none; /* 页面固定不滚动，手势全部交给图表处理 */
     }
     .chart-tabs-bar {
       display: flex;
       align-items: center;
       justify-content: flex-start;
       gap: 8px;
-      margin-bottom: 15px;
-      padding-bottom: 12px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
       border-bottom: 1px solid #252525;
     }
     .chart-tabs {
@@ -354,20 +386,28 @@
       color: #fff;
       border-color: #444;
     }
+    /* 固定视口：让交易数据页/交易记录页占满剩余空间 */
+    #pageTrades .card.trades-card { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    #pageTrades .card-title { flex-shrink: 0; }
+    .trade-header { flex-shrink: 0; }
+    #pageData .card.chart-card { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .chart-tabs-bar { flex-shrink: 0; }
+    .chart-info { flex-shrink: 0; }
+    .pnl-zoom { flex-shrink: 0; }
     /* 单笔盈亏信息区（参考样式：标题 + 日期 + 金额） */
     .chart-info {
-      margin-top: 12px;
+      margin-top: 8px;
     }
     .chart-info .ci-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #888;
     }
     .chart-info .ci-value {
-      font-size: 1.45rem;
-      font-weight: 700;
+      font-size: 0.95rem;
+      font-weight: 600;
       color: #fff;
-      margin-top: 4px;
+      margin-top: 2px;
     }
     .chart-info .ci-value.positive { color: #4caf50; }
     .chart-info .ci-value.negative { color: #f44336; }
@@ -437,6 +477,11 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
     .trade-item {
       background: #1a1a1a;
@@ -625,12 +670,13 @@
     .top-nav {
       display: flex;
       gap: 10px;
-      padding: 15px 0;
+      padding: 10px 0;
+      flex-shrink: 0;
     }
     .top-nav-btn {
       flex: 1;
       min-width: 0;
-      padding: 14px 8px;
+      padding: 12px 8px;
       border: 1px solid #333;
       background: none;
       color: #666;
@@ -650,13 +696,52 @@
       transform: scale(0.98);
     }
     @media (min-width: 768px) {
-      body { padding-bottom: 0; }
-      .container { max-width: 500px; }
-      .bottom-nav { display: none; }
-      .chart-container { height: 350px; }
+      .container { max-width: 520px; }
+      .chart-container { min-height: 260px; }
+    }
+    /* 紧凑排版：保证常见手机一屏放下 */
+    .top-nav { padding: 6px 0; }
+      .top-nav-btn { padding: 9px 6px; font-size: 0.85rem; }
+      .card { padding: 12px; }
+      .card.compact { padding: 10px; }
+      .card-title { margin-bottom: 8px; padding-bottom: 8px; font-size: 0.82rem; }
+      .current-balance { padding: 10px; margin-bottom: 9px; }
+      .current-balance .value { font-size: 1.3rem; }
+      .form-group { margin-bottom: 9px; }
+      .form-group label { margin-bottom: 5px; font-size: 0.75rem; }
+      .form-group input { padding: 10px 12px; }
+      .pnl-input-item input { padding: 10px 12px; }
+      .pnl-input-item label { margin-bottom: 4px; }
+      .btn { padding: 11px; min-height: 40px; }
+      .btn.compact { padding: 9px; min-height: 36px; }
+      .mode-btn { padding: 9px 8px; }
+      .stat-card { padding: 8px 6px; }
+      .stat-card.main { padding: 10px 8px; }
+      .stat-value { font-size: 0.8rem; }
+      .stat-card.main .stat-value { font-size: 0.95rem; }
+      .chart-container { min-height: 110px; }
+      .trade-item { padding: 11px 12px; }
+    @media (max-height: 680px) {
+      .top-nav-btn { padding: 8px 6px; font-size: 0.78rem; }
+      .card { padding: 10px; }
+      .card.compact { padding: 9px; }
+      .card-title { margin-bottom: 6px; padding-bottom: 6px; }
+      .current-balance { padding: 8px; margin-bottom: 8px; }
+      .current-balance .value { font-size: 1.15rem; }
+      .current-balance .label { font-size: 0.72rem; margin-bottom: 2px; }
+      .form-group { margin-bottom: 7px; }
+      .form-group input, .pnl-input-item input { padding: 8px 10px; }
+      .btn { padding: 9px; min-height: 36px; }
+      .btn.compact { padding: 8px; min-height: 32px; }
+      .stat-value { font-size: 0.75rem; }
+      .stat-card.main .stat-value { font-size: 0.88rem; }
+      .chart-container { min-height: 95px; }
+    }
+    /* 极小屏（矮+窄）允许页面内滚动，防止关键操作被裁 */
+    @media (max-height: 600px) and (max-width: 380px) {
+      .page.active { overflow-y: auto; overscroll-behavior: contain; }
     }
     @media (max-width: 400px) {
-      .card-row { flex-direction: column; }
       .trade-header { grid-template-columns: 30px minmax(62px,1.1fr) 54px 62px 40px; gap: 6px; font-size: 0.7rem; padding: 8px 10px; }
       .trade-item { grid-template-columns: 30px minmax(62px,1.1fr) 54px 62px 40px; gap: 6px; padding: 12px 10px; }
       .trade-pnl { font-size: 0.9rem; }
@@ -744,8 +829,8 @@
           <div class="stat-label">总收益率</div>
           <div class="stat-value" id="statReturn">0.00%</div>
         </div>
-        <div class="stat-card main">
-          <div class="stat-label">总盈亏</div>
+        <div class="stat-card main clickable" id="statPnlCard" onclick="openNetPnlModal()">
+          <div class="stat-label">净盈亏</div>
           <div class="stat-value" id="statPnl">$0</div>
         </div>
       </div>
@@ -778,7 +863,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card chart-card">
       <div class="chart-tabs-bar">
         <div class="chart-tabs">
           <button class="chart-tab active" id="tabEquity" onclick="showChart('equity')">资产</button>
@@ -803,7 +888,7 @@
 
   <!-- 交易记录页面 -->
   <div class="page" id="pageTrades">
-    <div class="card">
+    <div class="card trades-card">
       <div class="card-title">交易记录</div>
       <div class="trade-header" id="tradeHeader" style="display: none;">
         <span>#</span><span>盈亏</span><span>收益率</span><span>余额</span><span>操作</span>
@@ -835,7 +920,26 @@
   </div>
 </div>
 
-<!-- 交易次数详情弹窗 -->
+<!-- 净盈亏详情弹窗 -->
+<div class="modal-overlay" id="netPnlModal">
+  <div class="modal-box">
+    <div class="modal-title">💰 盈亏明细</div>
+    <div class="modal-stat">
+      <span class="modal-label">净盈亏</span>
+      <span class="modal-value" id="modalNetPnl">$0</span>
+    </div>
+    <div class="modal-stat">
+      <span class="modal-label">总盈利</span>
+      <span class="modal-value positive" id="modalTotalWin">$0</span>
+    </div>
+    <div class="modal-stat">
+      <span class="modal-label">总亏损</span>
+      <span class="modal-value negative" id="modalTotalLoss">$0</span>
+    </div>
+    <button class="modal-close" onclick="closeNetPnlModal()">关闭</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="countModal">
   <div class="modal-box">
     <div class="modal-title">🧮 交易次数统计</div>
@@ -896,6 +1000,9 @@
       });
       document.getElementById('drawdownModal').addEventListener('click', function(e) {
         if (e.target === this) closeDrawdownModal();
+      });
+      document.getElementById('netPnlModal').addEventListener('click', function(e) {
+        if (e.target === this) closeNetPnlModal();
       });
     }
 
@@ -1031,7 +1138,8 @@
         capital: initial, totalPnl: 0, totalReturn: 0, maxDD: 0, winRate: 0,
         ratio: 0, count: trades.length, avg: 0, maxConsecLoss: 0,
         equity: [initial], returns: [0],
-        avgWin: 0, avgLoss: 0, winCount: 0, lossCount: 0
+        avgWin: 0, avgLoss: 0, winCount: 0, lossCount: 0,
+        totalWin: 0, totalLoss: 0
       };
       if (trades.length === 0) return s;
       var bal = initial, peak = initial;
@@ -1051,6 +1159,8 @@
       }
       s.capital = bal;
       s.totalPnl = bal - initial;
+      s.totalWin = winSum;
+      s.totalLoss = lossSum;
       s.totalReturn = (s.totalPnl / initial) * 100;
       s.maxDD = s.maxDD * 100;
       s.winRate = trades.length > 0 ? (wins / trades.length) * 100 : 0;
@@ -1142,11 +1252,9 @@
       var container = document.getElementById('chartBox');
       var dpr = window.devicePixelRatio || 1;
       var rect = container.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
-      ctx.scale(dpr, dpr);
+      canvas.width = Math.max(1, Math.round(rect.width * dpr));
+      canvas.height = Math.max(1, Math.round(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       var s = getStats();
       var data = chartType === 'equity' ? s.equity : s.returns;
       var threshold = chartType === 'equity' ? initial : 0;
@@ -1575,6 +1683,21 @@
       document.getElementById('modalWinCount').textContent = s.winCount;
       document.getElementById('modalLossCount').textContent = s.lossCount;
       document.getElementById('countModal').classList.add('active');
+    };
+
+    // 打开净盈亏弹窗：净盈亏 / 总盈利 / 总亏损
+    window.openNetPnlModal = function() {
+      var s = getStats();
+      var netEl = document.getElementById('modalNetPnl');
+      netEl.textContent = (s.totalPnl >= 0 ? '+' : '-') + fmt(Math.abs(s.totalPnl));
+      netEl.className = 'modal-value ' + (s.totalPnl >= 0 ? 'positive' : 'negative');
+      document.getElementById('modalTotalWin').textContent = '+' + fmt(s.totalWin);
+      document.getElementById('modalTotalLoss').textContent = '-' + fmt(s.totalLoss);
+      document.getElementById('netPnlModal').classList.add('active');
+    };
+
+    window.closeNetPnlModal = function() {
+      document.getElementById('netPnlModal').classList.remove('active');
     };
 
     window.closeCountModal = function() {
