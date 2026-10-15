@@ -699,6 +699,31 @@
       .container { max-width: 520px; }
       .chart-container { min-height: 260px; }
     }
+    /* 大屏手机（如 iPhone 16 Pro）：恢复舒适排版，避免内容过小、下方大片留白 */
+    @media (min-height: 740px) {
+      .top-nav { padding: 8px 0; }
+      .top-nav-btn { padding: 13px 8px; font-size: 0.95rem; }
+      .card { padding: 16px; }
+      .card.compact { padding: 14px; }
+      .card-title { margin-bottom: 12px; padding-bottom: 10px; font-size: 0.9rem; }
+      .current-balance { padding: 16px; margin-bottom: 12px; }
+      .current-balance .value { font-size: 1.7rem; }
+      .form-group { margin-bottom: 14px; }
+      .form-group label { margin-bottom: 7px; font-size: 0.85rem; }
+      .form-group input, .pnl-input-item input { padding: 14px 16px; }
+      .btn { padding: 14px; min-height: 48px; }
+      .btn.compact { padding: 12px; min-height: 44px; }
+      .mode-btn { padding: 12px 10px; }
+      .stat-card { padding: 12px 8px; }
+      .stat-card.main { padding: 14px 10px; }
+      .stat-label { font-size: 0.75rem; }
+      .stat-value { font-size: 0.95rem; }
+      .stat-card.main .stat-value { font-size: 1.15rem; }
+      .chart-container { min-height: 220px; }
+      .trade-item { padding: 14px; }
+      /* 交易管理页铺满整屏：主卡片在上，初始设置/数据管理贴底 */
+      #pageManage { justify-content: space-between; gap: 14px; }
+    }
     /* 紧凑排版：保证常见手机一屏放下 */
     .top-nav { padding: 6px 0; }
       .top-nav-btn { padding: 9px 6px; font-size: 0.85rem; }
