@@ -1771,22 +1771,75 @@
       document.getElementById('drawdownModal').classList.remove('active');
     };
 
+    var DB_NAME = 'tradePhoneDB', STORE = 'kv', LS_KEY = 'tradeData';
+
+    function safeParse(s) {
+      try { return JSON.parse(s); } catch (e) { return null; }
+    }
+    function idbOpen() {
+      return new Promise(function (res, rej) {
+        if (!window.indexedDB) { rej('no-idb'); return; }
+        var req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = function () { req.result.createObjectStore(STORE); };
+        req.onsuccess = function () { res(req.result); };
+        req.onerror = function () { rej(req.error); };
+      });
+    }
+    function idbGet(db, key) {
+      return new Promise(function (res) {
+        try {
+          var tx = db.transaction(STORE, 'readonly');
+          var r = tx.objectStore(STORE).get(key);
+          r.onsuccess = function () { res(r.result || null); };
+          r.onerror = function () { res(null); };
+        } catch (e) { res(null); }
+      });
+    }
+    function idbPut(db, key, val) {
+      return new Promise(function (res) {
+        try {
+          var tx = db.transaction(STORE, 'readwrite');
+          tx.objectStore(STORE).put(val, key);
+          tx.oncomplete = function () { res(true); };
+          tx.onerror = function () { res(false); };
+        } catch (e) { res(false); }
+      });
+    }
+
+    // 同时持久化到 IndexedDB（主，主屏 App 重启后可可靠恢复）与 localStorage（兜底）
     function save() {
-      localStorage.setItem('tradeData', JSON.stringify({ initial: initial, trades: trades, locked: initialLocked }));
+      var obj = { initial: initial, trades: trades, locked: initialLocked };
+      try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); } catch (e) {}
+      idbOpen()
+        .then(function (db) { return idbPut(db, 'data', JSON.stringify(obj)); })
+        .catch(function () {});
+    }
+
+    function applyData(obj) {
+      if (obj) {
+        initial = obj.initial || 100000;
+        trades = obj.trades || [];
+        initialLocked = obj.locked || false;
+        var inp = document.getElementById('initialCapital');
+        if (inp) inp.value = initial;
+        recalc();
+      }
     }
 
     function load() {
-      try {
-        var d = localStorage.getItem('tradeData');
-        if (d) {
-          var obj = JSON.parse(d);
-          initial = obj.initial || 100000;
-          trades = obj.trades || [];
-          initialLocked = obj.locked || false;
-          document.getElementById('initialCapital').value = initial;
-          recalc();
-        }
-      } catch(e) {}
+      var done = function (obj) {
+        applyData(obj);
+        updateInitialUI();
+        render();
+      };
+      var lsRaw = null;
+      try { lsRaw = localStorage.getItem(LS_KEY); } catch (e) {}
+      var lsObj = safeParse(lsRaw);
+      if (!window.indexedDB) { done(lsObj); return; }
+      idbOpen()
+        .then(function (db) { return idbGet(db, 'data'); })
+        .then(function (idbRaw) { done(safeParse(idbRaw) || lsObj); })
+        .catch(function () { done(lsObj); });
     }
 
     window.exportCSV = function() {
