@@ -1077,7 +1077,9 @@
       document.getElementById('tooltip').classList.remove('show');
       lineMarker = false; // 切换图表时竖虚线不显示
       if (type === 'pnl') {
-        // 默认定位到最近一笔，并让最近一笔在可视窗口内
+        // 初始保持最小缩放（最远）：一屏显示全部笔数，柱子最细
+        pnlCount = Math.max(1, Math.min(trades.length, 40));
+        // 定位到最近一笔，并让最近一笔在可视窗口内
         pnlSelected = trades.length - 1;
         pnlStart = Math.max(0, trades.length - pnlCount);
       } else {
