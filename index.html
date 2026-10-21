@@ -826,9 +826,11 @@
       <div class="card compact">
         <div class="card-title">数据管理</div>
         <div class="btn-vertical">
+          <button class="btn btn-secondary compact" onclick="importCSV()">导入数据</button>
           <button class="btn btn-secondary compact" onclick="exportCSV()">导出数据</button>
           <button class="btn btn-danger compact" onclick="clearAll()">清空数据</button>
         </div>
+        <input type="file" id="importFile" accept=".csv,text/csv" style="display:none;">
       </div>
     </div>
   </div>
@@ -1020,6 +1022,9 @@
       });
       document.getElementById('netPnlModal').addEventListener('click', function(e) {
         if (e.target === this) closeNetPnlModal();
+      });
+      document.getElementById('importFile').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files.length > 0) handleImportFile(e.target.files[0]);
       });
     }
 
@@ -1840,6 +1845,66 @@
         .then(function (db) { return idbGet(db, 'data'); })
         .then(function (idbRaw) { done(safeParse(idbRaw) || lsObj); })
         .catch(function () { done(lsObj); });
+    }
+
+    window.importCSV = function() {
+      if (!confirm('导入将覆盖当前所有数据，确定继续？')) return;
+      var fileInput = document.getElementById('importFile');
+      fileInput.value = '';
+      fileInput.click();
+    };
+
+    function handleImportFile(file) {
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          var text = (e.target.result || '').replace(/^﻿/, '');
+          text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+          var lines = text.split('\n');
+          var parsedInitial = null;
+          var headerIdx = -1;
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i].trim();
+            if (parsedInitial === null && line.indexOf('初始资产') === 0) {
+              var ip = line.split(',');
+              if (ip.length >= 2) {
+                var iv = parseFloat(ip[1]);
+                if (!isNaN(iv)) parsedInitial = iv;
+              }
+            }
+            if (headerIdx === -1 && line.indexOf('序号') === 0) {
+              headerIdx = i;
+            }
+          }
+          if (headerIdx === -1) { alert('文件格式不正确：未找到交易记录表头'); return; }
+          var newTrades = [];
+          for (var j = headerIdx + 1; j < lines.length; j++) {
+            var row = lines[j].trim();
+            if (row === '') continue;
+            var cols = row.split(',');
+            if (cols.length < 2) continue;
+            var idx = parseInt(cols[0], 10);
+            if (isNaN(idx)) continue;
+            var pnl = parseFloat(cols[1]);
+            if (isNaN(pnl)) continue;
+            var note = cols.length >= 5 ? cols[4].trim() : '';
+            newTrades.push({ id: Date.now() + j, pnl: pnl, note: note, before: 0 });
+          }
+          if (newTrades.length === 0) { alert('文件中没有有效的交易记录'); return; }
+          if (parsedInitial !== null && parsedInitial > 0) initial = parsedInitial;
+          initialLocked = true;
+          trades = newTrades;
+          recalc();
+          updateInitialUI();
+          save();
+          render();
+          showToast('成功导入 ' + trades.length + ' 条记录');
+        } catch (err) {
+          alert('导入失败：' + (err && err.message ? err.message : err));
+        }
+      };
+      reader.readAsText(file, 'utf-8');
     }
 
     window.exportCSV = function() {
