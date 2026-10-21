@@ -1811,9 +1811,9 @@
       });
     }
 
-    // 同时持久化到 IndexedDB（主，主屏 App 重启后可可靠恢复）与 localStorage（兜底）
+    // 同时持久化到 localStorage（主，主屏 App 重启后最可靠）与 IndexedDB（镜像）
     function save() {
-      var obj = { initial: initial, trades: trades, locked: initialLocked };
+      var obj = { initial: initial, trades: trades, locked: initialLocked, ts: Date.now() };
       try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); } catch (e) {}
       idbOpen()
         .then(function (db) { return idbPut(db, 'data', JSON.stringify(obj)); })
@@ -1823,7 +1823,7 @@
     function applyData(obj) {
       if (obj) {
         initial = obj.initial || 100000;
-        trades = obj.trades || [];
+        trades = Array.isArray(obj.trades) ? obj.trades : [];
         initialLocked = obj.locked || false;
         var inp = document.getElementById('initialCapital');
         if (inp) inp.value = initial;
@@ -1831,20 +1831,32 @@
       }
     }
 
+    // 选择数据更完整（交易条数更多）的数据源，避免空的/残缺的存储覆盖有效数据
+    function pickBest(a, b) {
+      var score = function (o) {
+        if (!o || typeof o !== 'object') return -1;
+        var t = Array.isArray(o.trades) ? o.trades.length : -1;
+        return t < 0 ? -1 : t;
+      };
+      var sa = score(a), sb = score(b);
+      if (sb > sa) return b;
+      return a;
+    }
+
     function load() {
-      var done = function (obj) {
-        applyData(obj);
+      var finish = function (idbObj) {
+        var lsRaw = null;
+        try { lsRaw = localStorage.getItem(LS_KEY); } catch (e) {}
+        var lsObj = safeParse(lsRaw);
+        applyData(pickBest(lsObj, idbObj));
         updateInitialUI();
         render();
       };
-      var lsRaw = null;
-      try { lsRaw = localStorage.getItem(LS_KEY); } catch (e) {}
-      var lsObj = safeParse(lsRaw);
-      if (!window.indexedDB) { done(lsObj); return; }
+      if (!window.indexedDB) { finish(null); return; }
       idbOpen()
         .then(function (db) { return idbGet(db, 'data'); })
-        .then(function (idbRaw) { done(safeParse(idbRaw) || lsObj); })
-        .catch(function () { done(lsObj); });
+        .then(function (idbRaw) { finish(safeParse(idbRaw)); })
+        .catch(function () { finish(null); });
     }
 
     window.importCSV = function() {
