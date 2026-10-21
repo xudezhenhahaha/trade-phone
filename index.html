@@ -1005,9 +1005,8 @@
     var lineMarker = false;  // 资产/收益率：竖虚线仅在交互时显示
 
     function init() {
-      load();
       updateInitialUI();
-      render();
+      load();              // load 内部负责 applyData + render（localStorage 同步优先）
       bindChartEvents();
       bindPnlInputEvents();
       // 点击遮罩关闭弹窗
@@ -1831,32 +1830,69 @@
       }
     }
 
-    // 选择数据更完整（交易条数更多）的数据源，避免空的/残缺的存储覆盖有效数据
+    // 选择数据更完整（交易条数更多；条数相同则取时间戳更新的）的数据源
     function pickBest(a, b) {
-      var score = function (o) {
-        if (!o || typeof o !== 'object') return -1;
-        var t = Array.isArray(o.trades) ? o.trades.length : -1;
-        return t < 0 ? -1 : t;
-      };
-      var sa = score(a), sb = score(b);
-      if (sb > sa) return b;
-      return a;
+      function valid(o) { return o && typeof o === 'object' && Array.isArray(o.trades); }
+      var va = valid(a), vb = valid(b);
+      if (!va && !vb) return null;
+      if (!va) return b;
+      if (!vb) return a;
+      if (b.trades.length !== a.trades.length) {
+        return b.trades.length > a.trades.length ? b : a;
+      }
+      return ((b.ts || 0) > (a.ts || 0)) ? b : a;
     }
 
     function load() {
-      var finish = function (idbObj) {
-        var lsRaw = null;
-        try { lsRaw = localStorage.getItem(LS_KEY); } catch (e) {}
-        var lsObj = safeParse(lsRaw);
-        applyData(pickBest(lsObj, idbObj));
+      var lsObj = null;
+      try { lsObj = safeParse(localStorage.getItem(LS_KEY)); } catch (e) {}
+
+      var rendered = false;
+      function applyAndRender(obj) {
+        applyData(obj);
         updateInitialUI();
         render();
-      };
-      if (!window.indexedDB) { finish(null); return; }
+        rendered = true;
+      }
+
+      // 1) 同步恢复：重进后立刻显示最新数据（不等 IndexedDB 冷启动）
+      if (lsObj) applyAndRender(lsObj);
+
+      if (!window.indexedDB) {
+        if (!rendered) applyAndRender(null);
+        return;
+      }
+
+      // 2) 异步读 IndexedDB 作为补充/容错，带超时兜底（避免 iOS PWA 冷启动挂起）
+      var settled = false;
+      var timer = setTimeout(function () {
+        if (settled) return;
+        settled = true;
+        if (!rendered) applyAndRender(null);
+      }, 1500);
+
       idbOpen()
         .then(function (db) { return idbGet(db, 'data'); })
-        .then(function (idbRaw) { finish(safeParse(idbRaw)); })
-        .catch(function () { finish(null); });
+        .then(function (idbRaw) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          var idbObj = safeParse(idbRaw);
+          var best = pickBest(lsObj, idbObj);
+          if (best && best !== lsObj) {
+            // IndexedDB 数据更全：应用并回写 localStorage 保持一致
+            applyAndRender(best);
+            try { localStorage.setItem(LS_KEY, JSON.stringify(best)); } catch (e) {}
+          } else if (!rendered) {
+            applyAndRender(null);
+          }
+        })
+        .catch(function () {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          if (!rendered) applyAndRender(null);
+        });
     }
 
     window.importCSV = function() {
