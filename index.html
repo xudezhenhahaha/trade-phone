@@ -36,10 +36,8 @@
       overflow: hidden;
       overscroll-behavior: none;
       color: #e0e0e0;
-      /* 顶部安全区：兜底 54px 以覆盖含灵动岛的最高状态栏，避免 iOS 27.2 Liquid Glass 毛玻璃透出顶栏 */
-      padding-top: max(env(safe-area-inset-top, 0px), 54px);
-      /* 底部同样抬高兜底，避免内容探入 Home Indicator 区域 */
-      padding-bottom: max(env(safe-area-inset-bottom, 0px), 34px);
+      padding-top: max(8px, env(safe-area-inset-top));
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
       display: flex;
       flex-direction: column;
     }
@@ -638,7 +636,7 @@
       background: #141414;
       border-top: 1px solid #252525;
       display: flex;
-      padding-bottom: max(env(safe-area-inset-bottom, 0px), 34px);
+      padding-bottom: env(safe-area-inset-bottom);
       z-index: 1000;
     }
     .nav-item {
@@ -682,7 +680,6 @@
       gap: 10px;
       padding: 10px 0;
       flex-shrink: 0;
-      background: #0a0a0a;  /* 实底背景，防止状态栏毛玻璃透出按钮文字 */
     }
     .top-nav-btn {
       flex: 1;
