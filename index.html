@@ -210,6 +210,12 @@
       font-weight: 600;
       margin-top: 10px;
     }
+    .pnl-input-item.transfer-in label { color: #9c27b0; }
+    .pnl-input-item.transfer-out label { color: #2196f3; }
+    .pnl-input-item.transfer-in input { border-color: #3a2a4a; }
+    .pnl-input-item.transfer-in input:focus { border-color: #9c27b0; }
+    .pnl-input-item.transfer-out input { border-color: #2a3a4a; }
+    .pnl-input-item.transfer-out input:focus { border-color: #2196f3; }
     .btn {
       width: 100%;
       padding: 13px;
@@ -356,7 +362,7 @@
       min-height: 130px;
       background: #0a0a0a;
       border-radius: 12px;
-      margin-top: 10px;
+      margin-top: 6px;
     }
     #chartCanvas {
       position: absolute;
@@ -371,8 +377,8 @@
       align-items: center;
       justify-content: flex-start;
       gap: 8px;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
+      margin-bottom: 4px;
+      padding-bottom: 6px;
       border-bottom: 1px solid #252525;
     }
     .chart-tabs {
@@ -404,7 +410,21 @@
     .pnl-zoom { flex-shrink: 0; }
     /* 单笔盈亏信息区（参考样式：标题 + 日期 + 金额） */
     .chart-info {
-      margin-top: 8px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 42px;
+    }
+    .ci-left { flex: 1; min-width: 0; }
+    .ci-right {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      margin-left: auto;
     }
     .chart-info .ci-title {
       font-size: 0.75rem;
@@ -422,6 +442,33 @@
     /* 统一：盈利绿、亏损红 */
     .chart-info .ci-value.profit { color: #4caf50; }
     .chart-info .ci-value.loss { color: #f44336; }
+    .ci-detail-btn {
+      padding: 2px 8px;
+      border: 1px solid #444;
+      background: #222;
+      color: #ccc;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+    .ci-detail-btn:active { background: #333; }
+    .transfer-legend {
+      display: flex;
+      gap: 16px;
+      flex-shrink: 0;
+      font-size: 0.7rem;
+      color: #888;
+    }
+    .transfer-legend .sw {
+      display: inline-block;
+      width: 14px;
+      height: 3px;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+    .transfer-legend .sw.in { background: #9c27b0; }
+    .transfer-legend .sw.out { background: #2196f3; }
 
     .chart-tooltip {
       position: absolute;
@@ -463,12 +510,12 @@
       grid-template-columns: 32px minmax(72px,1.2fr) 64px 74px 44px;
       gap: 8px;
       padding: 10px 14px;
-      background: #1a1a1a;
+      background: #262626;
       border-radius: 10px;
       margin-bottom: 10px;
-      border: 1px solid #252525;
+      border: 1px solid #333;
       font-size: 0.75rem;
-      color: #666;
+      color: #999;
       font-weight: 500;
     }
     .trade-header span {
@@ -628,6 +675,63 @@
     .modal-close:active {
       background: #3a3a3a;
     }
+    #assetModal .modal-box {
+      max-width: 460px;
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #assetModal .modal-box > .modal-title,
+    #assetModal .modal-stat,
+    #assetModal .transfer-list-title,
+    #assetModal .transfer-table-head,
+    #assetModal .modal-close { flex-shrink: 0; }
+    #assetModal #assetTransferList {
+      flex: 1 1 auto;
+      min-height: 60px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    .transfer-list-title {
+      font-size: 0.8rem;
+      color: #888;
+      margin: 14px 0 6px;
+    }
+    .transfer-table-head, .transfer-record {
+      display: grid;
+      grid-template-columns: 1fr 1fr 0.8fr 1fr 32px;
+      gap: 6px;
+      align-items: center;
+    }
+    .transfer-table-head {
+      padding: 8px 0;
+      border-bottom: 1px solid #333;
+      color: #666;
+      font-size: 0.7rem;
+    }
+    .transfer-table-head span:last-child { text-align: center; }
+    .transfer-record {
+      padding: 12px 0;
+      border-bottom: 1px solid #252525;
+      font-size: 0.85rem;
+    }
+    .transfer-record .tr-date, .transfer-record .tr-type { color: #aaa; font-size: 0.8rem; }
+    .transfer-record .tr-balance { color: #888; font-size: 0.8rem; }
+    .transfer-record .tr-amount.in { color: #9c27b0; font-weight: 600; }
+    .transfer-record .tr-amount.out { color: #2196f3; font-weight: 600; }
+    .tr-del {
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 1.2rem;
+      min-width: 32px;
+      min-height: 32px;
+      border-radius: 8px;
+    }
+    .tr-del:active { color: #f44336; background: rgba(244,67,54,0.1); }
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -778,16 +882,15 @@
   <!-- 交易管理页面 -->
   <div class="page active" id="pageManage">
     <div class="card">
-      <div class="card-title">添加单笔交易记录</div>
       <div class="current-balance">
         <div class="label">当前资产</div>
         <div class="value" id="displayBalance">$100,000</div>
       </div>
       <div class="form-group">
-        <label>输入方式</label>
+        <label>输入单笔交易盈亏 / 资金转入转出记录</label>
         <div class="mode-switch">
           <button class="mode-btn active" id="btnPnl" onclick="setMode('pnl')">盈亏金额</button>
-          <button class="mode-btn" id="btnBal" onclick="setMode('balance')">账户余额</button>
+          <button class="mode-btn" id="btnTransfer" onclick="setMode('transfer')">转入/转出</button>
         </div>
       </div>
       <div id="groupPnl">
@@ -806,11 +909,20 @@
           </div>
         </div>
       </div>
-      <div class="form-group" id="groupBal" style="display:none;">
-        <label>交易后账户余额</label>
-        <input type="number" id="inputBal" placeholder="输入当前账户余额" inputmode="decimal">
+      <div class="form-group" id="groupTransfer" style="display:none;">
+        <label>输入转入或转出金额（二选一）</label>
+        <div class="pnl-input-group">
+          <div class="pnl-input-item transfer-in">
+            <label>转入资金</label>
+            <input type="number" id="inputTransferIn" placeholder="输入转入金额" inputmode="decimal">
+          </div>
+          <div class="pnl-input-item transfer-out">
+            <label>转出资金</label>
+            <input type="number" id="inputTransferOut" placeholder="输入转出金额" inputmode="decimal">
+          </div>
+        </div>
       </div>
-      <button class="btn btn-primary" onclick="addTrade()">添加记录</button>
+      <button class="btn btn-primary" id="btnSubmit" onclick="submitEntry()">添加记录</button>
     </div>
 
     <div class="card-row">
@@ -838,7 +950,6 @@
   <!-- 交易数据页面 -->
   <div class="page" id="pageData">
     <div class="card compact">
-      <div class="card-title">交易数据</div>
       <div class="stats-grid">
         <div class="stat-card main">
           <div class="stat-label">当前资产</div>
@@ -885,14 +996,23 @@
     <div class="card chart-card">
       <div class="chart-tabs-bar">
         <div class="chart-tabs">
-          <button class="chart-tab active" id="tabEquity" onclick="showChart('equity')">资产</button>
-          <button class="chart-tab" id="tabReturn" onclick="showChart('return')">收益率</button>
+          <button class="chart-tab active" id="tabReturn" onclick="showChart('return')">收益率</button>
+          <button class="chart-tab" id="tabEquity" onclick="showChart('equity')">资产</button>
           <button class="chart-tab" id="tabPnl" onclick="showChart('pnl')">单笔盈亏</button>
         </div>
       </div>
       <div class="chart-info" id="chartInfo" style="display:none;">
-        <div class="ci-title">单笔盈亏</div>
-        <div class="ci-value" id="ciValue">$0.00</div>
+        <div class="ci-left">
+          <div class="ci-title">单笔盈亏</div>
+          <div class="ci-value" id="ciValue">$0.00</div>
+        </div>
+        <div class="ci-right" id="ciRight" style="display:none;">
+          <button class="ci-detail-btn" id="btnAssetDetail" onclick="openAssetModal()">资产明细</button>
+          <div class="transfer-legend" id="transferLegend" style="display:none;">
+            <span><i class="sw in"></i>转入</span>
+            <span><i class="sw out"></i>转出</span>
+          </div>
+        </div>
       </div>
       <div class="chart-container" id="chartBox">
         <canvas id="chartCanvas"></canvas>
@@ -908,7 +1028,6 @@
   <!-- 交易记录页面 -->
   <div class="page" id="pageTrades">
     <div class="card trades-card">
-      <div class="card-title">交易记录</div>
       <div class="trade-header" id="tradeHeader" style="display: none;">
         <span>#</span><span>盈亏</span><span>收益率</span><span>余额</span><span>操作</span>
       </div>
@@ -987,12 +1106,26 @@
   </div>
 </div>
 
+<!-- 资产明细弹窗 -->
+<div class="modal-overlay" id="assetModal">
+  <div class="modal-box">
+    <div class="modal-title">💼 资产明细</div>
+    <div class="modal-stat"><span class="modal-label">当前资产</span><span class="modal-value" id="assetModalCurrent">$0</span></div>
+    <div class="modal-stat"><span class="modal-label">初始资产</span><span class="modal-value" id="assetModalInitial">$0</span></div>
+    <div class="transfer-list-title">转入转出记录</div>
+    <div class="transfer-table-head"><span>日期</span><span>金额</span><span>转入/转出</span><span>当前余额</span><span>操作</span></div>
+    <div id="assetTransferList"></div>
+    <button class="modal-close" onclick="closeAssetModal()">关闭</button>
+  </div>
+</div>
+
 <script>
   (function() {
     var initial = 100000;
     var trades = [];
+    var transfers = [];   // 资金转入/转出记录：{ id, amount(正=转入/负=转出) }
     var mode = 'pnl';
-    var chartType = 'equity';
+    var chartType = 'return';
     var initialLocked = false;
     var chartPoints = [];
     var currentPage = 'manage';
@@ -1022,6 +1155,9 @@
       document.getElementById('netPnlModal').addEventListener('click', function(e) {
         if (e.target === this) closeNetPnlModal();
       });
+      document.getElementById('assetModal').addEventListener('click', function(e) {
+        if (e.target === this) closeAssetModal();
+      });
       document.getElementById('importFile').addEventListener('change', function(e) {
         if (e.target.files && e.target.files.length > 0) handleImportFile(e.target.files[0]);
       });
@@ -1032,6 +1168,10 @@
       var lossInput = document.getElementById('inputLoss');
       profitInput.addEventListener('input', function() { if (this.value !== '') lossInput.value = ''; });
       lossInput.addEventListener('input', function() { if (this.value !== '') profitInput.value = ''; });
+      var inInput = document.getElementById('inputTransferIn');
+      var outInput = document.getElementById('inputTransferOut');
+      inInput.addEventListener('input', function() { if (this.value !== '') outInput.value = ''; });
+      outInput.addEventListener('input', function() { if (this.value !== '') inInput.value = ''; });
     }
 
     window.switchPage = function(page) {
@@ -1064,9 +1204,10 @@
     window.setMode = function(m) {
       mode = m;
       document.getElementById('btnPnl').className = m === 'pnl' ? 'mode-btn active' : 'mode-btn';
-      document.getElementById('btnBal').className = m === 'balance' ? 'mode-btn active' : 'mode-btn';
+      document.getElementById('btnTransfer').className = m === 'transfer' ? 'mode-btn active' : 'mode-btn';
       document.getElementById('groupPnl').style.display = m === 'pnl' ? 'block' : 'none';
-      document.getElementById('groupBal').style.display = m === 'balance' ? 'block' : 'none';
+      document.getElementById('groupTransfer').style.display = m === 'transfer' ? 'block' : 'none';
+      document.getElementById('btnSubmit').textContent = m === 'pnl' ? '添加记录' : '确认转入/转出';
     };
 
     window.showChart = function(type) {
@@ -1103,34 +1244,55 @@
       render();
     };
 
-    function getBalance() {
-      var bal = initial;
-      for (var i = 0; i < trades.length; i++) bal += trades[i].pnl;
-      return bal;
+    function nextId() {
+      var max = 0, i;
+      for (i = 0; i < trades.length; i++) if (trades[i].id > max) max = trades[i].id;
+      for (i = 0; i < transfers.length; i++) if (transfers[i].id > max) max = transfers[i].id;
+      return Math.max(Date.now(), max + 1);
     }
 
     window.addTrade = function() {
       if (!initialLocked) { alert('请先确认设置初始资产'); return; }
-      var pnl, currentBal = getBalance();
-      if (mode === 'pnl') {
-        var profitVal = document.getElementById('inputProfit').value;
-        var lossVal = document.getElementById('inputLoss').value;
-        if (profitVal !== '' && !isNaN(parseFloat(profitVal))) pnl = Math.abs(parseFloat(profitVal));
-        else if (lossVal !== '' && !isNaN(parseFloat(lossVal))) pnl = -Math.abs(parseFloat(lossVal));
-        else { alert('请输入盈利金额或亏损金额'); return; }
-      } else {
-        var v = document.getElementById('inputBal').value;
-        if (v === '' || isNaN(parseFloat(v))) { alert('请输入有效的账户余额'); return; }
-        pnl = parseFloat(v) - currentBal;
-      }
-      trades.push({ id: Date.now(), pnl: pnl, before: currentBal });
+      var profitVal = document.getElementById('inputProfit').value;
+      var lossVal = document.getElementById('inputLoss').value;
+      var pnl;
+      if (profitVal !== '' && !isNaN(parseFloat(profitVal))) pnl = Math.abs(parseFloat(profitVal));
+      else if (lossVal !== '' && !isNaN(parseFloat(lossVal))) pnl = -Math.abs(parseFloat(lossVal));
+      else { alert('请输入盈利金额或亏损金额'); return; }
+      trades.push({ id: nextId(), pnl: pnl, before: 0 });
       document.getElementById('inputProfit').value = '';
       document.getElementById('inputLoss').value = '';
-      document.getElementById('inputBal').value = '';
       document.activeElement.blur();
+      recalc();
       save();
       render();
       showToast('记录已添加');
+    };
+
+    window.addTransfer = function() {
+      if (!initialLocked) { alert('请先确认设置初始资产'); return; }
+      var inVal = document.getElementById('inputTransferIn').value;
+      var outVal = document.getElementById('inputTransferOut').value;
+      var inAmt = inVal !== '' ? parseFloat(inVal) : 0;
+      var outAmt = outVal !== '' ? parseFloat(outVal) : 0;
+      var amount = 0;
+      if (inAmt > 0 && outAmt > 0) { alert('请只填写转入或转出其中一项'); return; }
+      if (inAmt > 0) amount = inAmt;
+      else if (outAmt > 0) amount = -Math.abs(outAmt);
+      else { alert('请输入有效的转入或转出金额'); return; }
+      transfers.push({ id: nextId(), amount: amount, before: 0, after: 0 });
+      document.getElementById('inputTransferIn').value = '';
+      document.getElementById('inputTransferOut').value = '';
+      document.activeElement.blur();
+      recalc();
+      save();
+      render();
+      showToast(amount > 0 ? '转入成功' : '转出成功');
+    };
+
+    window.submitEntry = function() {
+      if (mode === 'pnl') window.addTrade();
+      else window.addTransfer();
     };
 
     function showToast(msg) {
@@ -1151,37 +1313,61 @@
       render();
     };
 
-    function recalc() {
-      var bal = initial;
-      for (var i = 0; i < trades.length; i++) { trades[i].before = bal; bal += trades[i].pnl; }
+    // 按时间合并交易与转入转出，生成统一资产时间线（节点记录余额与各自累计值）
+    function buildTimeline() {
+      var evs = [], i;
+      for (i = 0; i < trades.length; i++) evs.push({ id: trades[i].id, kind: 'trade', ref: trades[i] });
+      for (i = 0; i < transfers.length; i++) evs.push({ id: transfers[i].id, kind: 'transfer', ref: transfers[i] });
+      evs.sort(function(a, b) { return (a.id || 0) - (b.id || 0); });
+      var bal = initial, tradeCum = 0, transferCum = 0;
+      var nodes = [{ kind: 'start', bal: initial, tradeCum: 0, transferCum: 0, ref: null }];
+      for (i = 0; i < evs.length; i++) {
+        var e = evs[i], before = bal;
+        if (e.kind === 'trade') { bal += (e.ref.pnl || 0); tradeCum += (e.ref.pnl || 0); }
+        else { bal += (e.ref.amount || 0); transferCum += (e.ref.amount || 0); }
+        e.ref.before = before;
+        e.ref.after = bal;
+        nodes.push({ kind: e.kind, amount: e.ref.amount, bal: bal, tradeCum: tradeCum, transferCum: transferCum, ref: e.ref });
+      }
+      return nodes;
     }
 
+    function recalc() { buildTimeline(); }
+
     function getStats() {
+      var nodes = buildTimeline();
+      var last = nodes[nodes.length - 1];
       var s = {
-        capital: initial, totalPnl: 0, totalReturn: 0, maxDD: 0, winRate: 0,
+        capital: last.bal, totalPnl: last.tradeCum, totalReturn: 0, maxDD: 0, winRate: 0,
         ratio: 0, count: trades.length, avg: 0, maxConsecLoss: 0,
-        equity: [initial], returns: [0],
+        equity: [], equityKinds: [], returns: [], nodes: nodes,
         avgWin: 0, avgLoss: 0, winCount: 0, lossCount: 0,
         totalWin: 0, totalLoss: 0
       };
-      if (trades.length === 0) return s;
-      var bal = initial, peak = initial;
-      var wins = 0, losses = 0, winSum = 0, lossSum = 0;
-      var consec = 0, maxConsec = 0;
-      for (var i = 0; i < trades.length; i++) {
-        var t = trades[i];
-        bal += t.pnl;
-        s.equity.push(bal);
-        s.returns.push((bal - initial) / initial * 100);
-        if (t.pnl > 0) { wins++; winSum += t.pnl; consec = 0; }
-        else if (t.pnl < 0) { losses++; lossSum += Math.abs(t.pnl); consec++; if (consec > maxConsec) maxConsec = consec; }
-        else { consec = 0; }
-        if (bal > peak) peak = bal;
-        var dd = peak > 0 ? (peak - bal) / peak : 0;
+      var i, n;
+      for (i = 0; i < nodes.length; i++) {
+        n = nodes[i];
+        s.equity.push(n.bal);
+        // 收益率曲线只反映交易盈亏：转账不生成节点，曲线不产生横线
+        if (n.kind !== 'transfer') s.returns.push((n.tradeCum / initial) * 100);
+        s.equityKinds.push(n.kind === 'transfer' ? (n.amount >= 0 ? 'in' : 'out') : '');
+      }
+      // 最大回撤基于纯交易资产，避免入金造成失真
+      var peak = initial;
+      for (i = 0; i < nodes.length; i++) {
+        var tb = initial + nodes[i].tradeCum;
+        if (tb > peak) peak = tb;
+        var dd = peak > 0 ? (peak - tb) / peak : 0;
         if (dd > s.maxDD) s.maxDD = dd;
       }
-      s.capital = bal;
-      s.totalPnl = bal - initial;
+      var wins = 0, losses = 0, winSum = 0, lossSum = 0;
+      var consec = 0, maxConsec = 0;
+      for (i = 0; i < trades.length; i++) {
+        var pnl = trades[i].pnl || 0;
+        if (pnl > 0) { wins++; winSum += pnl; consec = 0; }
+        else if (pnl < 0) { losses++; lossSum += Math.abs(pnl); consec++; if (consec > maxConsec) maxConsec = consec; }
+        else { consec = 0; }
+      }
       s.totalWin = winSum;
       s.totalLoss = lossSum;
       s.totalReturn = (s.totalPnl / initial) * 100;
@@ -1279,6 +1465,8 @@
       canvas.height = Math.max(1, Math.round(rect.height * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       var s = getStats();
+      var legend = document.getElementById('transferLegend');
+      if (legend) legend.style.display = (chartType === 'equity' && transfers.length > 0) ? 'flex' : 'none';
       var data = chartType === 'equity' ? s.equity : s.returns;
       var threshold = chartType === 'equity' ? initial : 0;
       var w = rect.width, h = rect.height;
@@ -1324,14 +1512,32 @@
       // 折线图（每笔等间距直连）
       // 整体盈利为绿色，整体亏损为红色
       var lastVal = data[data.length - 1];
-      var overallUp = chartType === 'equity' ? (lastVal >= initial) : (lastVal >= 0);
+      var overallUp = chartType === 'equity' ? (s.totalPnl >= 0) : (lastVal >= 0);
       var color = overallUp ? '#4caf50' : '#f44336';
-      ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      function segColor(idx) {
+        if (chartType === 'equity' && s.equityKinds) {
+          var k = s.equityKinds[idx];
+          if (k === 'in') return '#9c27b0';
+          if (k === 'out') return '#2196f3';
+        }
+        return color;
+      }
+      ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
       for (var i=1; i<pts.length; i++) {
         ctx.lineTo(pts[i].x, pts[i].y);
       }
       ctx.stroke();
+      // 转入/转出区间的连线单独着色：转入紫、转出蓝
+      if (chartType === 'equity' && transfers.length > 0) {
+        ctx.lineWidth = 2;
+        for (var i=1; i<pts.length; i++) {
+          var k = s.equityKinds[i];
+          if (k !== 'in' && k !== 'out') continue;
+          ctx.strokeStyle = (k === 'in' ? '#9c27b0' : '#2196f3');
+          ctx.beginPath(); ctx.moveTo(pts[i-1].x, pts[i-1].y); ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke();
+        }
+      }
 
       // 当前选中点的竖虚线：仅在点击/滑动交互后出现
       if (lineMarker) {
@@ -1341,7 +1547,7 @@
         ctx.setLineDash([]);
         // 空心圆点：底色填充 + 曲线同色描边
         ctx.fillStyle = '#141414';
-        ctx.strokeStyle = color; ctx.lineWidth = 2;
+        ctx.strokeStyle = segColor(lineSelectedIdx); ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(sel.x, sel.y, 4, 0, Math.PI*2);
         ctx.fill(); ctx.stroke();
       }
@@ -1369,10 +1575,12 @@
       var info = document.getElementById('chartInfo');
       var titleEl = info.querySelector('.ci-title');
       var valEl = document.getElementById('ciValue');
+      var ciRight = document.getElementById('ciRight');
+      if (ciRight) ciRight.style.display = chartType === 'equity' ? 'flex' : 'none';
 
       if (chartType === 'pnl') {
         titleEl.textContent = '单笔盈亏';
-        info.style.display = 'block';
+        info.style.display = 'flex';
         if (trades.length === 0) {
           valEl.textContent = '$0.00';
           valEl.className = 'ci-value';
@@ -1387,7 +1595,7 @@
       }
 
       // 资产 / 收益率模式
-      info.style.display = 'block';
+      info.style.display = 'flex';
       var s = getStats();
       var data = chartType === 'equity' ? s.equity : s.returns;
       if (data.length === 0) {
@@ -1657,13 +1865,12 @@
         return;
       }
       header.style.display = 'grid';
+      buildTimeline();
       var html = '';
-      var balances = [], bal = initial;
-      for (var i=0; i<trades.length; i++) { bal += trades[i].pnl; balances.push(bal); }
       for (var i=trades.length-1; i>=0; i--) {
         var t = trades[i];
-        var before = t.before !== undefined ? t.before : (i===0 ? initial : balances[i-1]);
-        var after = balances[i];
+        var before = t.before !== undefined ? t.before : initial;
+        var after = t.after !== undefined ? t.after : before + (t.pnl || 0);
         var ret = before > 0 ? (t.pnl / before * 100) : 0;
         var cls = t.pnl >= 0 ? 'profit' : 'loss';
         html += '<div class="trade-item">';
@@ -1721,6 +1928,53 @@
 
     window.closeNetPnlModal = function() {
       document.getElementById('netPnlModal').classList.remove('active');
+    };
+
+    // 资产明细：当前资产 / 初始资产 / 转入转出记录
+    window.openAssetModal = function() {
+      var s = getStats();
+      document.getElementById('assetModalCurrent').textContent = fmt(s.capital);
+      document.getElementById('assetModalInitial').textContent = fmt(initial);
+      var byId = {}, i;
+      for (i = 0; i < s.nodes.length; i++) {
+        if (s.nodes[i].ref) byId[s.nodes[i].ref.id] = s.nodes[i];
+      }
+      var html = '';
+      if (transfers.length === 0) {
+        html = '<div class="modal-stat"><span class="modal-label">暂无转入转出记录</span></div>';
+      } else {
+        var list = transfers.slice().sort(function(a, b) { return (b.id || 0) - (a.id || 0); });
+        for (i = 0; i < list.length; i++) {
+          var tr = list[i];
+          var isIn = (tr.amount || 0) >= 0;
+          var node = byId[tr.id];
+          html += '<div class="transfer-record">';
+          html += '<span class="tr-date">' + dateOf(tr) + '</span>';
+          html += '<span class="tr-amount ' + (isIn ? 'in' : 'out') + '">' + (isIn ? '+' : '-') + fmt(Math.abs(tr.amount)) + '</span>';
+          html += '<span class="tr-type">' + (isIn ? '转入' : '转出') + '</span>';
+          html += '<span class="tr-balance">' + (node ? fmt(node.bal) : '-') + '</span>';
+          html += '<button class="tr-del" onclick="deleteTransfer(' + tr.id + ')">×</button>';
+          html += '</div>';
+        }
+      }
+      document.getElementById('assetTransferList').innerHTML = html;
+      document.getElementById('assetModal').classList.add('active');
+    };
+
+    window.deleteTransfer = function(id) {
+      if (!confirm('确定取消这条转入转出记录？')) return;
+      var list = [];
+      for (var i = 0; i < transfers.length; i++) if (transfers[i].id !== id) list.push(transfers[i]);
+      transfers = list;
+      recalc();
+      save();
+      render();
+      window.openAssetModal();
+      showToast('已取消该记录');
+    };
+
+    window.closeAssetModal = function() {
+      document.getElementById('assetModal').classList.remove('active');
     };
 
     window.closeCountModal = function() {
@@ -1814,7 +2068,7 @@
 
     // 同时持久化到 localStorage（主，主屏 App 重启后最可靠）与 IndexedDB（镜像）
     function save() {
-      var obj = { initial: initial, trades: trades, locked: initialLocked, ts: Date.now() };
+      var obj = { initial: initial, trades: trades, transfers: transfers, locked: initialLocked, ts: Date.now() };
       try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); } catch (e) {}
       idbOpen()
         .then(function (db) { return idbPut(db, 'data', JSON.stringify(obj)); })
@@ -1825,6 +2079,7 @@
       if (obj) {
         initial = obj.initial || 100000;
         trades = Array.isArray(obj.trades) ? obj.trades : [];
+        transfers = Array.isArray(obj.transfers) ? obj.transfers : [];
         initialLocked = obj.locked || false;
         var inp = document.getElementById('initialCapital');
         if (inp) inp.value = initial;
@@ -1835,13 +2090,12 @@
     // 选择数据更完整（交易条数更多；条数相同则取时间戳更新的）的数据源
     function pickBest(a, b) {
       function valid(o) { return o && typeof o === 'object' && Array.isArray(o.trades); }
+      function events(o) { return o.trades.length + (Array.isArray(o.transfers) ? o.transfers.length : 0); }
       var va = valid(a), vb = valid(b);
       if (!va && !vb) return null;
       if (!va) return b;
       if (!vb) return a;
-      if (b.trades.length !== a.trades.length) {
-        return b.trades.length > a.trades.length ? b : a;
-      }
+      if (events(b) !== events(a)) return events(b) > events(a) ? b : a;
       return ((b.ts || 0) > (a.ts || 0)) ? b : a;
     }
 
@@ -1914,6 +2168,7 @@
           var lines = text.split('\n');
           var parsedInitial = null;
           var headerIdx = -1;
+          var transferSectionIdx = -1;
           for (var i = 0; i < lines.length; i++) {
             var line = lines[i].trim();
             if (parsedInitial === null && line.indexOf('初始资产') === 0) {
@@ -1926,10 +2181,15 @@
             if (headerIdx === -1 && line.indexOf('序号') === 0) {
               headerIdx = i;
             }
+            if (transferSectionIdx === -1 && line.indexOf('转入转出记录') === 0) {
+              transferSectionIdx = i;
+            }
           }
           if (headerIdx === -1) { alert('文件格式不正确：未找到交易记录表头'); return; }
+          var baseId = Date.now();
           var newTrades = [];
           for (var j = headerIdx + 1; j < lines.length; j++) {
+            if (transferSectionIdx !== -1 && j === transferSectionIdx) break;
             var row = lines[j].trim();
             if (row === '') continue;
             var cols = row.split(',');
@@ -1939,12 +2199,27 @@
             var pnl = parseFloat(cols[1]);
             if (isNaN(pnl)) continue;
             var note = cols.length >= 5 ? cols[4].trim() : '';
-            newTrades.push({ id: Date.now() + j, pnl: pnl, note: note, before: 0 });
+            var tid = cols.length >= 6 ? parseInt(cols[5], 10) : NaN;
+            newTrades.push({ id: isNaN(tid) ? baseId + j : tid, pnl: pnl, note: note, before: 0 });
           }
-          if (newTrades.length === 0) { alert('文件中没有有效的交易记录'); return; }
+          var newTransfers = [];
+          if (transferSectionIdx !== -1) {
+            for (var j = transferSectionIdx + 2; j < lines.length; j++) {
+              var trow = lines[j].trim();
+              if (trow === '') continue;
+              var tcols = trow.split(',');
+              if (tcols.length < 3) continue;
+              var tsId = parseInt(tcols[0], 10);
+              var amt = parseFloat(tcols[2]);
+              if (isNaN(tsId) || isNaN(amt) || amt <= 0) continue;
+              newTransfers.push({ id: tsId, amount: tcols[1].indexOf('转出') >= 0 ? -amt : amt, before: 0, after: 0 });
+            }
+          }
+          if (newTrades.length === 0 && newTransfers.length === 0) { alert('文件中没有有效的交易记录'); return; }
           if (parsedInitial !== null && parsedInitial > 0) initial = parsedInitial;
           initialLocked = true;
           trades = newTrades;
+          transfers = newTransfers;
           recalc();
           updateInitialUI();
           save();
@@ -1962,14 +2237,24 @@
       var csv = '交易记录分析报告\n\n初始资产,'+initial+'\n当前资产,'+s.capital+'\n总收益率,'+s.totalReturn.toFixed(2)+'%\n';
       csv += '总盈亏,'+s.totalPnl+'\n最大回撤,'+s.maxDD.toFixed(2)+'%\n胜率,'+s.winRate.toFixed(2)+'%\n';
       csv += '盈亏比,'+(s.ratio===Infinity?'无穷大':s.ratio.toFixed(2))+'\n交易次数,'+s.count+'\n最大连续亏损,'+s.maxConsecLoss+'\n\n';
-      csv += '序号,盈亏,本次收益率,余额,备注\n';
+      csv += '序号,盈亏,本次收益率,余额,备注,时间戳\n';
       var bal = initial;
       for (var i=0; i<trades.length; i++) {
         var t = trades[i];
         var before = t.before !== undefined ? t.before : bal;
         bal = before + t.pnl;
         var ret = before > 0 ? (t.pnl/before*100).toFixed(2) : '0.00';
-        csv += (i+1)+','+t.pnl+','+ret+'%,'+bal+','+(t.note||'')+'\n';
+        csv += (i+1)+','+t.pnl+','+ret+'%,'+bal+','+(t.note||'')+','+(t.id||'')+'\n';
+      }
+      if (transfers.length > 0) {
+        csv += '\n转入转出记录\n时间,类型,金额,记录后余额\n';
+        var byId = {}, k;
+        for (k = 0; k < s.nodes.length; k++) if (s.nodes[k].ref) byId[s.nodes[k].ref.id] = s.nodes[k];
+        var list = transfers.slice().sort(function(a, b) { return (a.id || 0) - (b.id || 0); });
+        for (k = 0; k < list.length; k++) {
+          var tr = list[k], node = byId[tr.id];
+          csv += (tr.id || '') + ',' + ((tr.amount || 0) >= 0 ? '转入' : '转出') + ',' + Math.abs(tr.amount) + ',' + (node ? node.bal : '') + '\n';
+        }
       }
       var blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
       var link = document.createElement('a');
@@ -1982,6 +2267,7 @@
     window.clearAll = function() {
       if (confirm('确定清空所有数据？此操作不可恢复。')) {
         trades = [];
+        transfers = [];
         initialLocked = false;
         updateInitialUI();
         save();
@@ -2001,7 +2287,7 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         var id = document.activeElement.id;
-        if (id === 'inputProfit' || id === 'inputLoss' || id === 'inputBal') addTrade();
+        if (id === 'inputProfit' || id === 'inputLoss' || id === 'inputTransferIn' || id === 'inputTransferOut') submitEntry();
       }
     });
 
